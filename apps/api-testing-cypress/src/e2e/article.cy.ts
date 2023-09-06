@@ -468,6 +468,36 @@ describe('@POST favorite article', () => {
       );
     });
   });
+
+  it('KO @401', () => {
+    // Given
+    registerUser().then((response: Cypress.Response<User>) => {
+      cy.wrap(response.body.user.token).as('token');
+    });
+
+    cy.then(function () {
+      createArticle(
+        {
+          title: `${Cypress.env('prefix')}${Date.now()}`,
+          description: `${Cypress.env('prefix')}${Date.now()}`,
+          body: `${Cypress.env('prefix')}${Date.now()}`,
+          tagList: [`${Cypress.env('prefix')}${Date.now()}`],
+        },
+        this.token,
+      ).then((response: Cypress.Response<Article>) => {
+        cy.wrap(response.body.article.slug).as('slug');
+      });
+    });
+
+    // When
+    cy.then(function () {
+      favoriteArticle(this.slug, undefined).then((response: Cypress.Response<any>) => {
+        // Then
+        expect(response.status).to.equal(401);
+        expect(response.body.message).to.equal('missing authorization credentials');
+      });
+    });
+  });
 });
 
 describe('@DELETE unfavorite article', () => {
@@ -528,6 +558,36 @@ describe('@DELETE unfavorite article', () => {
           expect(response.body.article.favoritesCount).to.equal(0);
         },
       );
+    });
+  });
+
+  it('KO @401', () => {
+    // Given
+    registerUser().then((response: Cypress.Response<User>) => {
+      cy.wrap(response.body.user.token).as('token');
+    });
+
+    cy.then(function () {
+      createArticle(
+        {
+          title: `${Cypress.env('prefix')}${Date.now()}`,
+          description: `${Cypress.env('prefix')}${Date.now()}`,
+          body: `${Cypress.env('prefix')}${Date.now()}`,
+          tagList: [`${Cypress.env('prefix')}${Date.now()}`],
+        },
+        this.token,
+      ).then((response: Cypress.Response<Article>) => {
+        cy.wrap(response.body.article.slug).as('slug');
+      });
+    });
+
+    // When
+    cy.then(function () {
+      unfavoriteArticle(this.slug, undefined).then((response: Cypress.Response<any>) => {
+        // Then
+        expect(response.status).to.equal(401);
+        expect(response.body.message).to.equal('missing authorization credentials');
+      });
     });
   });
 });
