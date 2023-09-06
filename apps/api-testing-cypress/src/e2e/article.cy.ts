@@ -13,7 +13,32 @@ describe('@GET articles', () => {
 });
 
 describe('@GET feed', () => {
-  // TODO
+  it('OK @200', () => {
+    // When
+    registerUser().then((response: Cypress.Response<User>) => {
+      cy.wrap(response.body.user.token).as('token');
+    });
+
+    cy.then(function () {
+      cy.getRequest(`/api/articles/feed`, this.token).then((response: Cypress.Response<any>) => {
+        // Then
+        expect(response.status).to.equal(200);
+        expect(response.body.articles.length).to.equal(0);
+        expect(response.body.articlesCount).to.equal(0);
+      });
+    });
+  });
+
+  it('KO @401', () => {
+    // When
+    cy.then(function () {
+      cy.getRequest(`/api/articles/feed`, undefined).then((response: Cypress.Response<any>) => {
+        // Then
+        expect(response.status).to.equal(401);
+        expect(response.body.message).to.equal('missing authorization credentials');
+      });
+    });
+  });
 });
 
 describe('@GET article', () => {

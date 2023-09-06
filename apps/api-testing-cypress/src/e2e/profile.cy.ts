@@ -44,16 +44,15 @@ describe('@POST follow user', () => {
       cy.wrap(response.body.user).as('user');
     });
 
+    const article = {
+      title: `${Cypress.env('prefix')}${Date.now()}`,
+      description: `${Cypress.env('prefix')}${Date.now()}`,
+      body: `${Cypress.env('prefix')}${Date.now()}`,
+      tagList: [`${Cypress.env('prefix')}${Date.now()}`],
+    };
+
     cy.then(function () {
-      createArticle(
-        {
-          title: `${Cypress.env('prefix')}${Date.now()}`,
-          description: `${Cypress.env('prefix')}${Date.now()}`,
-          body: `${Cypress.env('prefix')}${Date.now()}`,
-          tagList: [`${Cypress.env('prefix')}${Date.now()}`],
-        },
-        this.user.token,
-      );
+      createArticle(article, this.user.token);
     });
 
     registerUser({
@@ -71,16 +70,32 @@ describe('@POST follow user', () => {
           // Then
           expect(response.status).to.equal(200);
           expect(response.body.profile.following).to.equal(true);
+          expect(response.body.profile.username).to.equal(this.user.username);
         },
       );
     });
 
     cy.then(function () {
+      // Following fails for reference implementation:
+      // cy.getRequest(`/api/profiles/${this.user.username}`, this.followerToken).then(
+      //   (response: Cypress.Response<Profile>) => {
+      //     // Then
+      //     expect(response.status).to.equal(200);
+      //     expect(response.body.profile.following).to.equal(true);
+      //   },
+      // );
+
       cy.getRequest(`/api/articles/feed`, this.followerToken).then(
         (response: Cypress.Response<any>) => {
           // Then
           expect(response.status).to.equal(200);
+          expect(response.body.articlesCount).to.equal(1);
           expect(response.body.articles.length).to.equal(1);
+          expect(response.body.articles[0].title).to.equal(article.title);
+          expect(response.body.articles[0].description).to.equal(article.description);
+          expect(response.body.articles[0].body).to.equal(article.body);
+          expect(response.body.articles[0].tagList).to.deep.equal(article.tagList);
+          expect(response.body.articles[0].author.username).to.deep.equal(this.user.username);
         },
       );
     });
@@ -109,6 +124,15 @@ describe('@DELETE unfollow user', () => {
     // When
     cy.then(function () {
       cy.deleteRequest(`/api/profiles/${this.user.username}/follow`, this.followerToken).then(
+        (response: Cypress.Response<Profile>) => {
+          // Then
+          expect(response.status).to.equal(200);
+          expect(response.body.profile.following).to.equal(false);
+          expect(response.body.profile.username).to.equal(this.user.username);
+        },
+      );
+
+      cy.getRequest(`/api/profiles/${this.user.username}`, this.followerToken).then(
         (response: Cypress.Response<Profile>) => {
           // Then
           expect(response.status).to.equal(200);
