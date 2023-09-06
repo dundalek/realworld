@@ -150,6 +150,26 @@ describe('@POST login', () => {
       expect(response.body.errors.password[0]).to.equal("can't be blank");
     });
   });
+
+  it('KO @422 : incorrect password', () => {
+    // Given
+    const user = {
+      username: `${Cypress.env('prefix')}${Date.now()}`,
+      email: `${Cypress.env('prefix')}${Date.now()}`,
+      password: `${Cypress.env('prefix')}${Date.now()}`,
+    };
+    registerUser(user);
+
+    // When
+    login({
+      email: user.email,
+      password: 'incorrect',
+    }).then(response => {
+      // Then
+      expect(response.status).to.equal(403);
+      expect(response.body.errors['email or password'][0]).to.equal('is invalid');
+    });
+  });
 });
 
 // get current user
