@@ -95,11 +95,49 @@ describe('@POST follow user', () => {
           expect(response.body.articles[0].description).to.equal(article.description);
           expect(response.body.articles[0].body).to.equal(article.body);
           expect(response.body.articles[0].tagList).to.deep.equal(article.tagList);
-          expect(response.body.articles[0].author.username).to.deep.equal(this.user.username);
+          expect(response.body.articles[0].author.username).to.equal(this.user.username);
         },
       );
     });
   });
+
+  it('KO @401', () => {
+    // Given
+    registerUser().then((response: Cypress.Response<User>) => {
+      cy.wrap(response.body.user).as('user');
+    });
+
+    // When
+    cy.then(function () {
+      cy.postRequest(`/api/profiles/${this.user.username}/follow`, {}, undefined).then(
+        (response: Cypress.Response<any>) => {
+          // Then
+          expect(response.status).to.equal(401);
+          expect(response.body.message).to.equal('missing authorization credentials');
+        },
+      );
+    });
+  });
+
+  // Following fails for reference implementation:
+  // it('KO @422', () => {
+  //   // Given
+  //   const unknownUsername = `${new Date().getTime() * 3}`;
+  //
+  //   registerUser().then((response: Cypress.Response<User>) => {
+  //     cy.wrap(response.body.user.token).as('followerToken');
+  //   });
+  //
+  //   // When
+  //   cy.then(function () {
+  //     cy.postRequest(`/api/profiles/${unknownUsername}/follow`, {}, this.followerToken).then(
+  //       (response: Cypress.Response<Profile>) => {
+  //         // Then
+  //         expect(response.status).to.equal(422);
+  //       },
+  //     );
+  //   });
+  // });
 });
 
 describe('@DELETE unfollow user', () => {
@@ -137,6 +175,24 @@ describe('@DELETE unfollow user', () => {
           // Then
           expect(response.status).to.equal(200);
           expect(response.body.profile.following).to.equal(false);
+        },
+      );
+    });
+  });
+
+  it('KO @401', () => {
+    // Given
+    registerUser().then((response: Cypress.Response<User>) => {
+      cy.wrap(response.body.user).as('user');
+    });
+
+    // When
+    cy.then(function () {
+      cy.deleteRequest(`/api/profiles/${this.user.username}/follow`, undefined).then(
+        (response: Cypress.Response<any>) => {
+          // Then
+          expect(response.status).to.equal(401);
+          expect(response.body.message).to.equal('missing authorization credentials');
         },
       );
     });
