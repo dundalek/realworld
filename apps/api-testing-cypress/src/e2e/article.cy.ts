@@ -457,6 +457,15 @@ describe('@POST favorite article', () => {
         expect(response.body.article.favorited).to.equal(true);
         expect(response.body.article.favoritesCount).to.equal(1);
       });
+
+      cy.getRequest(`/api/articles/${this.slug}`, this.followerToken).then(
+        (response: Cypress.Response<Article>) => {
+          // Then
+          expect(response.status).to.equal(200);
+          expect(response.body.article.favorited).to.equal(true);
+          expect(response.body.article.favoritesCount).to.equal(1);
+        },
+      );
     });
   });
 });
@@ -503,6 +512,15 @@ describe('@DELETE unfavorite article', () => {
     // When
     cy.then(function () {
       unfavoriteArticle(this.slug, this.followerToken).then(
+        (response: Cypress.Response<Article>) => {
+          // Then
+          expect(response.status).to.equal(200);
+          expect(response.body.article.favorited).to.equal(false);
+          expect(response.body.article.favoritesCount).to.equal(0);
+        },
+      );
+
+      cy.getRequest(`/api/articles/${this.slug}`, this.followerToken).then(
         (response: Cypress.Response<Article>) => {
           // Then
           expect(response.status).to.equal(200);
