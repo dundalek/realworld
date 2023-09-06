@@ -232,8 +232,18 @@ describe('@PUT update user', () => {
           expect(response.status).to.equal(200);
           expect(response.body.user.username).to.equal(updateUser.username);
           expect(response.body.user.email).to.equal(updateUser.email);
+          expect(response.body.user).to.haveOwnProperty('token');
+          cy.wrap(response.body.user.token).as('token');
         },
       );
+    });
+
+    cy.then(function () {
+      cy.getRequest('/api/user', this.token).then((response: Cypress.Response<User>) => {
+        expect(response.status).to.equal(200);
+        expect(response.body.user.username).to.equal(updateUser.username);
+        expect(response.body.user.email).to.equal(updateUser.email);
+      });
     });
   });
 
