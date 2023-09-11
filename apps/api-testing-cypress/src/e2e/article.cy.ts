@@ -813,21 +813,33 @@ describe('@DELETE comments', () => {
       });
     });
 
-    const comment = { body: 'Hello' };
+    const comment = { body: `${Cypress.env('prefix')}${Date.now()}-1` };
 
     cy.then(function () {
       cy.postRequest(`/api/articles/${this.slug}/comments`, { comment }, this.user.token).then(
         (response: Cypress.Response<any>) => {
           expect(response.status).to.equal(200);
-          cy.wrap(response.body.comment).as('comment');
+          cy.wrap(response.body.comment.id).as('commentId');
         },
       );
+    });
+
+    const otherComment = { body: `${Cypress.env('prefix')}${Date.now()}-2` };
+
+    cy.then(function () {
+      cy.postRequest(
+        `/api/articles/${this.slug}/comments`,
+        { comment: otherComment },
+        this.user.token,
+      ).then((response: Cypress.Response<any>) => {
+        expect(response.status).to.equal(200);
+      });
     });
 
     // When
     cy.then(function () {
       cy.deleteRequest(
-        `/api/articles/${this.slug}/comments/${this.comment.id}`,
+        `/api/articles/${this.slug}/comments/${this.commentId}`,
         this.user.token,
       ).then((response: Cypress.Response<any>) => {
         // Then
@@ -840,7 +852,8 @@ describe('@DELETE comments', () => {
         (response: Cypress.Response<any>) => {
           // Then
           expect(response.status).to.equal(200);
-          expect(response.body.comments.length).to.equal(0);
+          expect(response.body.comments.length).to.equal(1);
+          expect(response.body.comments[0].body).to.equal(otherComment.body);
         },
       );
     });
