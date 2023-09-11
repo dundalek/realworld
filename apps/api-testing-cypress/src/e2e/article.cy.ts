@@ -265,6 +265,12 @@ describe('@PUT article', () => {
         expect(response.status).to.equal(200);
         expect(response.body.article.description).to.equal('foo');
       });
+
+      cy.getRequest(`/api/articles/${this.slug}`).then((response: Cypress.Response<Article>) => {
+        // Then
+        expect(response.status).to.equal(200);
+        expect(response.body.article.description).to.equal('foo');
+      });
     });
   });
 
@@ -329,6 +335,11 @@ describe('@DELETE article', () => {
       deleteArticle(this.slug, this.token).then((response: Cypress.Response<never>) => {
         // Then
         expect(response.status).to.equal(204);
+      });
+
+      cy.getRequest(`/api/articles/${this.slug}`).then((response: Cypress.Response<never>) => {
+        // Then
+        expect(response.status).to.equal(404);
       });
     });
   });
