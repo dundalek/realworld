@@ -76,15 +76,6 @@ describe('@POST follow user', () => {
     });
 
     cy.then(function () {
-      // Following fails for reference implementation:
-      // cy.getRequest(`/api/profiles/${this.user.username}`, this.followerToken).then(
-      //   (response: Cypress.Response<Profile>) => {
-      //     // Then
-      //     expect(response.status).to.equal(200);
-      //     expect(response.body.profile.following).to.equal(true);
-      //   },
-      // );
-
       cy.getRequest(`/api/articles/feed`, this.followerToken).then(
         (response: Cypress.Response<any>) => {
           // Then
@@ -118,26 +109,6 @@ describe('@POST follow user', () => {
       );
     });
   });
-
-  // Following fails for reference implementation:
-  // it('KO @422', () => {
-  //   // Given
-  //   const unknownUsername = `${new Date().getTime() * 3}`;
-  //
-  //   registerUser().then((response: Cypress.Response<User>) => {
-  //     cy.wrap(response.body.user.token).as('followerToken');
-  //   });
-  //
-  //   // When
-  //   cy.then(function () {
-  //     cy.postRequest(`/api/profiles/${unknownUsername}/follow`, {}, this.followerToken).then(
-  //       (response: Cypress.Response<Profile>) => {
-  //         // Then
-  //         expect(response.status).to.equal(422);
-  //       },
-  //     );
-  //   });
-  // });
 });
 
 describe('@DELETE unfollow user', () => {
